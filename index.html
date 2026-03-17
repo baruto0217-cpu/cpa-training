@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CPA Training">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="./manifest.json">
+<title>CPA Training — 愛知県第18版</title>
+<!-- フォントはシステムフォントを使用（オフライン対応） -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#f1f5f9;font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',YuGothic,sans-serif;color:#1e293b;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;}
+canvas{touch-action:none;cursor:crosshair;display:block;}
+.ht{display:none!important;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px;}
+input,select,textarea{font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',YuGothic,sans-serif;font-size:14px;box-sizing:border-box;}
+button{font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',YuGothic,sans-serif;cursor:pointer;}
+button:active{opacity:0.7;}
+/* ヘッダー */
+#hdr{background:#0f172a;color:#fff;flex-shrink:0;}
+#hdr-top{display:flex;align-items:center;padding:5px 10px;border-bottom:1px solid #1e293b;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#hdr-logo{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+#hdr-logo-icon{background:#dc2626;border-radius:7px;padding:4px 6px;display:flex;align-items:center;}
+#hdr-title{font-size:12px;font-weight:900;letter-spacing:0.06em;white-space:nowrap;}
+#hdr-sub{font-size:9px;color:#475569;}
+#hdr-btns{display:flex;align-items:center;gap:4px;flex-shrink:0;margin-left:auto;}
+.hbtn{display:flex;align-items:center;gap:3px;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:700;border:none;color:#fff;cursor:pointer;height:30px;white-space:nowrap;flex-shrink:0;}
+.hbtn-ghost{background:rgba(255,255,255,0.12);}
+.hbtn-blue{background:#2563eb;}
+.hbtn-green{background:#059669;}
+.hdiv{width:1px;height:18px;background:#334155;}
+#tabs{display:flex;padding:0 10px;background:#1e293b;}
+.tab-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;font-size:11px;font-weight:700;background:transparent;border:none;border-bottom:2px solid transparent;color:#94a3b8;cursor:pointer;white-space:nowrap;}
+.tab-btn.on{color:#60a5fa;border-bottom-color:#3b82f6;}
+/* メイン */
+#main{flex:1;min-height:0;overflow:hidden;padding:8px;box-sizing:border-box;display:flex;flex-direction:column;}
+.panel{display:flex;flex:1;min-height:0;gap:8px;}
+/* カード */
+.card{display:flex;flex-direction:column;min-height:0;background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;}
+.card-hd{padding:6px 12px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px;background:#f8fafc;flex-shrink:0;font-weight:800;font-size:12px;}
+/* 左カラム */
+#left{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+/* 上部固定エリア */
+#top-fixed{flex-shrink:0;padding:7px 10px 4px;border-bottom:1px solid #e2e8f0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+/* 下部スクロール */
+#bot-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 10px;}
+/* フォームラベル */
+.fl{margin-bottom:6px;}
+.fl-lbl{font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;margin-bottom:2px;}
+.fi{width:100%;border:1px solid #cbd5e1;border-radius:6px;padding:5px 7px;font-size:14px;outline:none;color:#1e293b;background:#fff;}
+.fi:focus{border-color:#3b82f6;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;}
+/* ピリオド表 */
+#period-wrap{border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;margin-bottom:4px;}
+#period-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#ptbl{width:100%;min-width:520px;border-collapse:collapse;font-size:11px;}
+#ptbl th{padding:4px;font-weight:700;font-size:10px;color:#64748b;text-align:center;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;white-space:nowrap;background:#f8fafc;}
+#ptbl td{padding:2px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9;}
+#ptbl td:last-child{border-right:none;}
+#ptbl td.lbl{padding:3px 5px;font-weight:700;font-size:10px;color:#94a3b8;background:#f8fafc;text-align:center;white-space:nowrap;border-right:1px solid #e2e8f0;}
+#ptbl input,#ptbl select{width:100%;border:none;background:transparent;font-size:11px;outline:none;font-family:inherit;padding:3px;}
+#ptbl select{font-weight:700;color:#2563eb;text-align:center;}
+/* 区切り */
+.sep{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.sep-line{flex:1;height:1px;background:#e2e8f0;}
+.sep-txt{font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;}
+/* タイマー */
+#timer-box{background:#0f172a;border-radius:10px;padding:9px 12px;color:#fff;margin-bottom:8px;}
+#timer-main{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+#timer-icon{background:#2563eb;border-radius:7px;padding:5px 6px;display:flex;align-items:center;margin-right:9px;}
+#timer-lbl{font-size:9px;font-weight:800;color:#475569;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1px;}
+#timer-disp{font-size:22px;font-family:monospace;font-weight:900;letter-spacing:1px;}
+#timer-btns{display:flex;gap:7px;}
+.round-btn{width:36px;height:36px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+#metro-row{border-top:1px solid #1e293b;padding-top:7px;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
+#metro-lbl{font-size:10px;font-weight:700;color:#94a3b8;}
+#metro-ctrl{display:flex;align-items:center;gap:7px;}
+#bpm-range{width:76px;accent-color:#3b82f6;}
+#bpm-disp{font-family:monospace;font-size:10px;color:#64748b;width:50px;text-align:right;}
+#metro-btn{padding:6px 12px;border-radius:7px;font-size:10px;font-weight:800;background:#1e293b;color:#64748b;border:none;cursor:pointer;font-family:inherit;}
+#metro-btn.on{background:#2563eb;color:#fff;}
+/* ラップボタン */
+#lap-btn{width:100%;padding:9px;background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:8px;color:#64748b;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;margin-bottom:12px;}
+/* メモ */
+#memo{width:100%;border:1px solid #cbd5e1;border-radius:6px;padding:5px 7px;font-size:13px;font-family:monospace;line-height:1.6;resize:none;outline:none;height:82px;}
+#memo:focus{border-color:#3b82f6;}
+/* 右カラム */
+#right{width:40%;min-height:0;display:flex;flex-direction:column;gap:8px;}
+/* チェックリスト */
+#cl-card{flex:1 1 0;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+#cl-hd{background:#1d4ed8;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#cl-title{display:flex;align-items:center;gap:5px;color:#fff;font-size:11px;font-weight:800;text-transform:uppercase;}
+#edit-btn{font-size:9px;padding:4px 9px;border-radius:6px;font-weight:800;background:#1e40af;color:#bfdbfe;border:none;display:flex;align-items:center;gap:3px;cursor:pointer;flex-shrink:0;}
+#edit-btn.on{background:#fff;color:#1d4ed8;}
+#cl-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.cat-hd{background:#f1f5f9;padding:5px 10px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;}
+.cat-inp{background:transparent;border:none;outline:none;font-size:9px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;flex:1;font-family:inherit;}
+.ev-row{display:flex;align-items:flex-start;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(0,0,0,0.03);}
+.ev-row.is-o{background:#f0fdf4;}
+.ev-row.is-x{background:#fef2f2;}
+.ev-btns{display:flex;gap:4px;flex-shrink:0;margin-top:1px;}
+.ev-btn{width:26px;height:26px;border-radius:50%;border:2px solid #cbd5e1;background:transparent;color:#cbd5e1;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ev-btn.o{background:#16a34a;border-color:#16a34a;color:#fff;}
+.ev-btn.x{background:#dc2626;border-color:#dc2626;color:#fff;}
+.ev-lbl{flex:1;font-size:11px;background:transparent;border:none;outline:none;resize:none;line-height:1.5;font-family:inherit;cursor:pointer;padding:1px 3px;border-radius:3px;color:#374151;}
+.ev-lbl.is-o{color:#166534;font-weight:700;}
+.ev-lbl.is-x{color:#991b1b;font-weight:700;}
+.ev-lbl.edit{cursor:text;border:1px solid #bfdbfe;}
+.add-item-btn{width:100%;padding:6px;background:rgba(37,99,235,0.06);border:1px dashed #93c5fd;border-radius:7px;color:#2563eb;font-size:9px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;font-family:inherit;}
+.add-cat-btn{width:100%;padding:8px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;color:#64748b;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-family:inherit;}
+.del-btn{background:none;border:none;cursor:pointer;color:#94a3b8;display:flex;padding:3px;}
+.no-items{padding:8px 12px;font-size:10px;color:#94a3b8;text-align:center;font-style:italic;}
+/* 手書き */
+#draw-card{flex-shrink:0;background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:8px;}
+#draw-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+#draw-lbl{font-size:9px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.1em;}
+#draw-area{border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;background:#fff;}
+#cs{width:100%;display:block;}
+/* 結果レポート */
+#result-left{width:33%;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+#result-right{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+#xlist{flex:1;}
+#rate-box{margin-top:14px;padding:14px;background:#0f172a;border-radius:12px;text-align:center;flex-shrink:0;}
+#rate-lbl{font-size:9px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;}
+#rate-val{font-size:44px;font-weight:900;font-family:monospace;letter-spacing:2px;line-height:1;}
+#rate-sub{font-size:11px;color:#475569;margin-top:4px;}
+/* 結果キャンバス */
+#draw-result-wrap{flex:1;min-height:0;padding:12px;display:flex;flex-direction:column;overflow:hidden;}
+#cr-wrap{flex:1;min-height:0;background:#fff;border-radius:14px;overflow:hidden;border:2px solid #f1f5f9;}
+#cr{width:100%;display:block;}
+/* モーダル */
+.modal-bg{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);}
+.modal{background:#fff;border-radius:14px;padding:20px;width:min(560px,92vw);max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,0.3);}
+.modal-sm{width:min(320px,88vw);max-height:none;}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.modal-title{font-size:14px;font-weight:800;color:#1e293b;}
+.modal-body{overflow-y:auto;flex:1;}
+.rec-row{border:1px solid #e2e8f0;border-radius:9px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.rec-ts{font-size:10px;color:#94a3b8;margin-bottom:2px;}
+.rec-name{font-weight:700;font-size:13px;color:#1e293b;}
+.rec-btns{display:flex;gap:6px;}
+.rec-load{padding:7px 13px;background:#eff6ff;color:#1d4ed8;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+.cf-msg{font-size:13px;font-weight:600;color:#1e293b;text-align:center;margin-bottom:20px;white-space:pre-wrap;line-height:1.7;}
+.cf-btns{display:flex;justify-content:center;gap:10px;}
+.cf-cancel{padding:9px 20px;font-size:12px;font-weight:700;color:#64748b;background:#f1f5f9;border:none;border-radius:9px;cursor:pointer;font-family:inherit;}
+.cf-ok{padding:9px 20px;font-size:12px;font-weight:700;color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:inherit;}
+.pr-title{font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;}
+.pr-inp{width:100%;border:1px solid #cbd5e1;border-radius:6px;padding:8px;font-size:14px;outline:none;margin-bottom:16px;font-family:inherit;}
+.pr-inp:focus{border-color:#3b82f6;}
+.pr-btns{display:flex;justify-content:flex-end;gap:7px;}
+/* landscape */
+@media(orientation:landscape){
+  #hdr-top{padding:3px 10px;}
+  #main{padding:5px;}
+  .panel{gap:5px;}
+  #top-fixed{max-height:55%;overflow-y:auto;}
+  #draw-area{height:110px;}
+}
+@media(orientation:portrait){
+  #draw-area{height:170px;}
+}
+/* SVGアイコン */
+svg{flex-shrink:0;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ヘッダー -->
+  <div id="hdr">
+    <div id="hdr-top">
+      <div id="hdr-logo">
+        <div id="hdr-logo-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <div id="hdr-title">CPA TRAINING</div>
+          <div id="hdr-sub">愛知県第18版 シミュレーション記録</div>
+        </div>
+      </div>
+      <div id="hdr-btns">
+        <button class="hbtn hbtn-blue" onclick="saveRecord()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</button>
+        <button class="hbtn hbtn-ghost" onclick="openRecModal()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>記録一覧</button>
+        <div class="hdiv"></div>
+        <button class="hbtn hbtn-green" onclick="exportPDF()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF出力(要通信)</button>
+        <button class="hbtn hbtn-ghost" onclick="resetAll()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>リセット</button>
+      </div>
+    </div>
+    <div id="tabs">
+      <button class="tab-btn on" id="tab-s" onclick="switchTab('scenario')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>想定票（入力）</button>
+      <button class="tab-btn" id="tab-r" onclick="switchTab('result')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>結果レポート</button>
+    </div>
+  </div>
+
+  <!-- メイン -->
+  <div id="main">
+
+    <!-- 想定票パネル -->
+    <div class="panel" id="panel-s">
+
+      <!-- 左カラム -->
+      <div class="card" id="left">
+        <div class="card-hd">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+          活動記録・傷病者情報
+        </div>
+        <!-- 上部固定 -->
+        <div id="top-fixed">
+          <div class="fl"><div class="fl-lbl">指令内容</div><input class="fi" id="f-dispatch" type="text"></div>
+          <div class="grid3">
+            <div class="fl"><div class="fl-lbl">年齢</div><input class="fi" id="f-age" type="text"></div>
+            <div class="fl"><div class="fl-lbl">性別</div><select class="fi" id="f-sex"><option>男</option><option>女</option></select></div>
+            <div class="fl"><div class="fl-lbl">目撃</div><select class="fi" id="f-witness"><option>有</option><option>無</option></select></div>
+          </div>
+          <div class="grid3">
+            <div class="fl"><div class="fl-lbl">原因(推定)</div><input class="fi" id="f-cause" type="text"></div>
+            <div class="fl"><div class="fl-lbl">既往歴</div><input class="fi" id="f-pmh" type="text"></div>
+            <div class="fl"><div class="fl-lbl">かかりつけ</div><input class="fi" id="f-hospital" type="text"></div>
+          </div>
+          <div id="period-wrap">
+            <div id="period-scroll">
+              <table id="ptbl">
+                <thead><tr><th style="min-width:50px">時期</th><th style="min-width:62px">波形</th><th style="min-width:100px">特記事項</th><th style="min-width:52px">換気</th><th style="min-width:52px">ETCO2</th><th style="min-width:110px">予想される活動</th></tr></thead>
+                <tbody id="ptbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- 下部スクロール -->
+        <div id="bot-scroll">
+          <div class="sep"><div class="sep-line"></div><span class="sep-txt">タイマー・メモ</span><div class="sep-line"></div></div>
+          <div id="timer-box">
+            <div id="timer-main">
+              <div style="display:flex;align-items:center">
+                <div id="timer-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div style="margin-left:9px">
+                  <div id="timer-lbl">活動経過時間</div>
+                  <div id="timer-disp">00分00秒</div>
+                </div>
+              </div>
+              <div id="timer-btns">
+                <button class="round-btn" id="timer-play" style="background:#16a34a" onclick="toggleTimer()"><svg id="timer-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+                <button class="round-btn" style="background:#1e293b" onclick="resetTimer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg></button>
+              </div>
+            </div>
+            <div id="metro-row">
+              <div id="metro-lbl">メトロノーム（胸骨圧迫テンポ）</div>
+              <div id="metro-ctrl">
+                <input type="range" id="bpm-range" min="100" max="120" value="110" oninput="updateBpm(this.value)">
+                <span id="bpm-disp">110 BPM</span>
+                <button id="metro-btn" onclick="toggleMetro()">OFF</button>
+              </div>
+            </div>
+          </div>
+          <button id="lap-btn" onclick="addLap()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>現在の経過時間をメモに追記</button>
+          <div class="fl"><div class="fl-lbl">フリーメモ・活動ログ</div><textarea id="memo" placeholder="タイマーの記録がここに反映されます..."></textarea></div>
+          <div style="height:10px"></div>
+        </div>
+      </div>
+
+      <!-- 右カラム -->
+      <div id="right">
+        <!-- チェックリスト -->
+        <div class="card" id="cl-card" style="flex:1 1 0;min-height:0;">
+          <div id="cl-hd">
+            <div id="cl-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>活動評価チェックリスト</div>
+            <button id="edit-btn" onclick="toggleEdit()"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>項目を編集</button>
+          </div>
+          <div id="cl-body"></div>
+        </div>
+        <!-- 手書き -->
+        <div id="draw-card">
+          <div id="draw-hd">
+            <span id="draw-lbl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>手書きメモ</span>
+            <button onclick="clearCanvas()" style="background:none;border:none;cursor:pointer;color:#94a3b8;display:flex;padding:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16l10-10 7 7-3.5 3.5"/><path d="M6.5 17.5l-4-4"/></svg></button>
+          </div>
+          <div id="draw-area"><canvas id="cs"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 結果レポートパネル -->
+    <div class="panel ht" id="panel-r">
+      <div class="card" id="result-left" style="display:flex;flex-direction:column;">
+        <div class="card-hd" style="background:#1e293b;color:#fff;border-bottom:1px solid #334155;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          要改善項目 (×判定)
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;display:flex;flex-direction:column;">
+          <div id="xlist"></div>
+          <div id="rate-box">
+            <div id="rate-lbl">達成率 (○の割合)</div>
+            <div id="rate-val">0%</div>
+            <div id="rate-sub">0 / 0 項目達成</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="result-right" style="display:flex;flex-direction:column;">
+        <div class="card-hd" style="background:#1e293b;color:#fff;border-bottom:1px solid #334155;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;text-transform:uppercase;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+            手書きメモ・フィードバック
+          </div>
+          <button onclick="clearCanvas()" style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,0.07);border:1px solid #334155;border-radius:6px;padding:4px 9px;color:#94a3b8;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16l10-10 7 7-3.5 3.5"/><path d="M6.5 17.5l-4-4"/></svg>クリア</button>
+        </div>
+        <div id="draw-result-wrap">
+          <div id="cr-wrap"><canvas id="cr"></canvas></div>
+          <div style="margin-top:7px;display:flex;justify-content:space-between;font-size:9px;font-weight:700;color:#cbd5e1;font-style:italic"><span>※想定票タブの内容が自動で同期されます</span><span>愛知県救急隊シミュレーション記録</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- モーダル群 -->
+<div class="modal-bg ht" id="modal-rec">
+  <div class="modal">
+    <div class="modal-hd">
+      <span class="modal-title">保存された記録一覧</span>
+      <button onclick="closeModal('modal-rec')" style="background:none;border:none;cursor:pointer;color:#94a3b8;display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="rec-list"></div>
+  </div>
+</div>
+<div class="modal-bg ht" id="modal-cf">
+  <div class="modal modal-sm">
+    <p class="cf-msg" id="cf-msg"></p>
+    <div class="cf-btns">
+      <button class="cf-cancel ht" id="cf-cancel" onclick="closeCf()">キャンセル</button>
+      <button class="cf-ok" id="cf-ok" onclick="confirmOk()">OK</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg ht" id="modal-pr">
+  <div class="modal modal-sm">
+    <p class="pr-title" id="pr-title"></p>
+    <input type="text" class="pr-inp" id="pr-inp" onkeydown="if(event.key==='Enter')promptOk()">
+    <div class="pr-btns">
+      <button class="cf-cancel" onclick="closeModal('modal-pr')">キャンセル</button>
+      <button class="cf-ok" style="background:#2563eb" onclick="promptOk()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ── 定数 ── */
+const LS_KEY='cpa_v9';
+const PL=['初期','P1終了','P2終了','P3終了','P4終了','P5終了'];
+
+/* ── State ── */
+let S={
+  tab:'scenario',
+  rec:{dispatch:'',age:'',sex:'男',witness:'有',pmh:'',cause:'',hospital:'',
+       periods:Array(6).fill(null).map(()=>({rhythm:'',notes:'',vent:'',etco2:'',expectedAction:''})),
+       freeMemo:''},
+  cats:[
+    {id:'cp',title:'接触前',items:[]},{id:'c1',title:'1ピリオド',items:[]},
+    {id:'c2',title:'2ピリオド',items:[]},{id:'c3',title:'3ピリオド',items:[]},
+    {id:'c4',title:'4ピリオド',items:[]},{id:'c5',title:'5ピリオド',items:[]}
+  ],
+  ev:{},editMode:false,
+  time:0,running:false,metro:false,bpm:110,
+  cvUrl:null
+};
+let timerInt=null,metroInt=null,audioCtx=null,cfCb=null,prCb=null,drawingActive=false;
+
+/* ── localStorage ── */
+function loadSaved(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch{return[];}}
+function saveSavedToLS(arr){try{localStorage.setItem(LS_KEY,JSON.stringify(arr));}catch{showAlert('保存容量が不足しています。古い記録を削除してください。');}}
+
+/* ── フォーム読み書き ── */
+const g=id=>document.getElementById(id);
+const gv=id=>g(id)?g(id).value:'';
+const sv=(id,v)=>{if(g(id))g(id).value=v||'';}
+
+function getFormData(){
+  return{
+    dispatch:gv('f-dispatch'),age:gv('f-age'),sex:gv('f-sex'),
+    witness:gv('f-witness'),pmh:gv('f-pmh'),cause:gv('f-cause'),hospital:gv('f-hospital'),
+    periods:PL.map((_,i)=>({
+      rhythm:gv('pr-'+i),notes:gv('pn-'+i),vent:gv('pv-'+i),
+      etco2:gv('pe-'+i),expectedAction:gv('pa-'+i)
+    })),
+    freeMemo:gv('memo')
+  };
+}
+function setFormData(r){
+  sv('f-dispatch',r.dispatch);sv('f-age',r.age);sv('f-sex',r.sex);
+  sv('f-witness',r.witness);sv('f-pmh',r.pmh);sv('f-cause',r.cause);sv('f-hospital',r.hospital);
+  sv('memo',r.freeMemo);
+  if(r.periods)r.periods.forEach((p,i)=>{
+    sv('pr-'+i,p.rhythm);sv('pn-'+i,p.notes);sv('pv-'+i,p.vent);
+    sv('pe-'+i,p.etco2);sv('pa-'+i,p.expectedAction);
+  });
+}
+
+/* ── ピリオド表 ── */
+function buildTable(){
+  const tb=g('ptbody');tb.innerHTML='';
+  PL.forEach((_,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="lbl">${PL[i]}</td>
+      <td><select id="pr-${i}"><option value=""></option><option>Vf</option><option>VT</option><option>PEA</option><option>心静止</option><option>NSR</option></select></td>
+      <td><input type="text" id="pn-${i}" placeholder="特記事項"></td>
+      <td><input type="text" id="pv-${i}"></td>
+      <td><input type="text" id="pe-${i}" style="color:#2563eb;font-weight:700"></td>
+      <td><input type="text" id="pa-${i}" placeholder="例: 気道確保…"></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ── タブ ── */
+function switchTab(t){
+  S.tab=t;
+  g('panel-s').classList.toggle('ht',t!=='scenario');
+  g('panel-r').classList.toggle('ht',t!=='result');
+  g('tab-s').classList.toggle('on',t==='scenario');
+  g('tab-r').classList.toggle('on',t==='result');
+  if(t==='result'){updateResult();setTimeout(()=>syncCanvas('cr'),100);}
+}
+
+/* ── タイマー ── */
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+'分'+String(s%60).padStart(2,'0')+'秒';}
+function updateTimerDisp(){g('timer-disp').textContent=fmt(S.time);}
+function toggleTimer(){
+  S.running=!S.running;
+  const btn=g('timer-play'),svg=g('timer-icon-svg');
+  if(S.running){
+    btn.style.background='#dc2626';
+    svg.innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    timerInt=setInterval(()=>{S.time++;updateTimerDisp();},1000);
+  }else{
+    btn.style.background='#16a34a';
+    svg.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+    clearInterval(timerInt);
+  }
+}
+function resetTimer(){clearInterval(timerInt);S.running=false;S.time=0;updateTimerDisp();const btn=g('timer-play'),svg=g('timer-icon-svg');btn.style.background='#16a34a';svg.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';}
+function addLap(){const m=g('memo');m.value+=(m.value?'\n':'')+'記録時間: '+fmt(S.time);}
+
+/* ── メトロノーム ── */
+function playClick(){
+  if(!audioCtx)return;
+  const o=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  o.connect(gain);gain.connect(audioCtx.destination);
+  o.frequency.value=880;o.type='sine';
+  gain.gain.setValueAtTime(1,audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.1);
+  o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.1);
+}
+function toggleMetro(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  S.metro=!S.metro;
+  const btn=g('metro-btn');
+  if(S.metro){btn.textContent='ON';btn.classList.add('on');playClick();metroInt=setInterval(playClick,60000/S.bpm);}
+  else{btn.textContent='OFF';btn.classList.remove('on');clearInterval(metroInt);}
+}
+function updateBpm(v){S.bpm=Number(v);g('bpm-disp').textContent=v+' BPM';if(S.metro){clearInterval(metroInt);metroInt=setInterval(playClick,60000/S.bpm);}}
+
+/* ── キャンバス ── */
+function syncCanvas(id){
+  const c=g(id);if(!c)return;
+  const p=c.parentElement;if(!p||!p.clientWidth)return;
+  c.width=p.clientWidth;c.height=p.clientHeight||150;
+  const ctx=c.getContext('2d');ctx.lineCap='round';ctx.lineWidth=3;ctx.strokeStyle='#1e293b';
+  ctx.clearRect(0,0,c.width,c.height);
+  if(S.cvUrl){const img=new Image();img.onload=()=>ctx.drawImage(img,0,0,c.width,c.height);img.src=S.cvUrl;}
+}
+function initCanvases(){setTimeout(()=>{syncCanvas('cs');syncCanvas('cr');},100);}
+function attachDraw(canvasId){
+  const c=g(canvasId);if(!c)return;
+  const getXY=e=>{const r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height;const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*sx,y:(t.clientY-r.top)*sy};};
+  const onStart=e=>{e.preventDefault();const{x,y}=getXY(e);const ctx=c.getContext('2d');ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='#1e293b';ctx.beginPath();ctx.moveTo(x,y);drawingActive=true;};
+  const onMove=e=>{if(!drawingActive)return;e.preventDefault();const{x,y}=getXY(e);const ctx=c.getContext('2d');ctx.lineTo(x,y);ctx.stroke();};
+  const onEnd=()=>{if(!drawingActive)return;drawingActive=false;S.cvUrl=c.toDataURL();const other=canvasId==='cs'?'cr':'cs';syncCanvas(other);};
+  c.addEventListener('mousedown',onStart);c.addEventListener('mousemove',onMove);c.addEventListener('mouseup',onEnd);c.addEventListener('mouseleave',onEnd);
+  c.addEventListener('touchstart',onStart,{passive:false});c.addEventListener('touchmove',onMove,{passive:false});c.addEventListener('touchend',onEnd);
+}
+function clearCanvas(){showConfirm('手書き内容を消去しますか？',()=>{S.cvUrl=null;['cs','cr'].forEach(id=>{const c=g(id);if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);});});}
+
+/* ── チェックリスト ── */
+function renderChecklist(){
+  const body=g('cl-body');body.innerHTML='';
+  S.cats.forEach((cat,ci)=>{
+    const hd=document.createElement('div');hd.className='cat-hd';
+    const inp=document.createElement('input');inp.className='cat-inp';inp.value=cat.title;inp.readOnly=!S.editMode;
+    inp.placeholder=S.editMode?'大項目を入力':'';inp.oninput=e=>{S.cats[ci].title=e.target.value;};
+    hd.appendChild(inp);
+    if(S.editMode){const db=mkDelBtn(()=>showConfirm('この大項目を削除しますか？',()=>{S.cats.splice(ci,1);renderChecklist();}));hd.appendChild(db);}
+    body.appendChild(hd);
+    if(!cat.items.length&&!S.editMode){const p=document.createElement('div');p.className='no-items';p.textContent='項目がありません。「項目を編集」から追加してください。';body.appendChild(p);}
+    cat.items.forEach((item,ii)=>{
+      const row=document.createElement('div');
+      row.className='ev-row'+(S.ev[item.id]==='O'?' is-o':S.ev[item.id]==='X'?' is-x':'');
+      const btns=document.createElement('div');btns.className='ev-btns';
+      ['O','X'].forEach(v=>{
+        const b=document.createElement('button');
+        b.className='ev-btn'+(S.ev[item.id]===v?(v==='O'?' o':' x'):'');
+        b.textContent=v==='O'?'○':'×';
+        b.onclick=()=>{S.ev[item.id]=S.ev[item.id]===v?undefined:v;renderChecklist();if(S.tab==='result')updateResult();};
+        btns.appendChild(b);
+      });
+      const ta=document.createElement('textarea');ta.className='ev-lbl'+(S.ev[item.id]==='O'?' is-o':S.ev[item.id]==='X'?' is-x':'')+(S.editMode?' edit':'');
+      ta.value=item.label;ta.rows=1;ta.readOnly=!S.editMode;ta.placeholder=S.editMode?'評価項目を入力':'';
+      ta.oninput=e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';S.cats[ci].items[ii].label=e.target.value;};
+      if(!S.editMode)ta.onclick=()=>{
+        const c=S.ev[item.id];
+        S.ev[item.id]=c==='O'?'X':c==='X'?undefined:'O';
+        renderChecklist();if(S.tab==='result')updateResult();
+      };
+      setTimeout(()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';},0);
+      row.appendChild(btns);row.appendChild(ta);
+      if(S.editMode){const db=mkDelBtn(()=>showConfirm('この項目を削除しますか？',()=>{S.cats[ci].items.splice(ii,1);renderChecklist();}));row.appendChild(db);}
+      body.appendChild(row);
+    });
+    if(S.editMode){
+      const wrap=document.createElement('div');wrap.style.padding='4px 9px';
+      const ab=document.createElement('button');ab.className='add-item-btn';ab.innerHTML='＋ 評価項目を追加';
+      ab.onclick=()=>{S.cats[ci].items.push({id:'i'+Date.now()+Math.random().toString(36).slice(2,5),label:''});renderChecklist();};
+      wrap.appendChild(ab);body.appendChild(wrap);
+    }
+  });
+  if(S.editMode){
+    const wrap=document.createElement('div');wrap.style.padding='8px 9px';wrap.style.borderTop='1px solid #e2e8f0';
+    const ab=document.createElement('button');ab.className='add-cat-btn';ab.innerHTML='＋ 大項目（カテゴリ）を追加';
+    ab.onclick=()=>{S.cats.push({id:'c'+Date.now(),title:'',items:[]});renderChecklist();};
+    wrap.appendChild(ab);g('cl-body').appendChild(wrap);
+  }
+}
+function mkDelBtn(cb){const b=document.createElement('button');b.className='del-btn';b.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';b.onclick=cb;return b;}
+function toggleEdit(){
+  S.editMode=!S.editMode;
+  const btn=g('edit-btn');
+  btn.classList.toggle('on',S.editMode);
+  btn.textContent=S.editMode?'編集完了':'項目を編集';
+  renderChecklist();
+}
+
+/* ── 結果レポート ── */
+function updateResult(){
+  const tot=S.cats.reduce((s,c)=>s+c.items.length,0);
+  const oC=S.cats.reduce((s,c)=>s+c.items.filter(i=>S.ev[i.id]==='O').length,0);
+  const rate=tot===0?0:Math.round((oC/tot)*100);
+  const rv=g('rate-val');rv.textContent=rate+'%';rv.style.color=rate>=80?'#34d399':rate>=60?'#fbbf24':'#f87171';
+  g('rate-sub').textContent=oC+' / '+tot+' 項目達成';
+  const xl=g('xlist');xl.innerHTML='';
+  const hasX=S.cats.some(c=>c.items.some(i=>S.ev[i.id]==='X'));
+  if(!hasX){xl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100px;color:#94a3b8;font-size:11px;font-weight:700;text-align:center">×判定された項目はありません</div>';return;}
+  S.cats.forEach(cat=>{
+    const xs=cat.items.filter(i=>S.ev[i.id]==='X');if(!xs.length)return;
+    const hd=document.createElement('div');hd.style.cssText='font-size:9px;font-weight:800;color:#64748b;text-transform:uppercase;border-bottom:1px solid #f1f5f9;padding-bottom:3px;margin-bottom:5px;margin-top:10px';hd.textContent=cat.title;xl.appendChild(hd);
+    xs.forEach(item=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:6px;padding:2px 0';row.innerHTML=`<span style="color:#ef4444;font-weight:800;font-size:13px;width:14px;text-align:center;flex-shrink:0">×</span><span style="font-size:11px;color:#991b1b;font-weight:700;line-height:1.5">${item.label}</span>`;xl.appendChild(row);});
+  });
+}
+
+/* ── 保存・呼び出し（localStorage） ── */
+function saveRecord(){
+  const def=gv('f-dispatch')||new Date().toLocaleDateString()+'の記録';
+  showPrompt('保存する記録の名前を入力してください',def,name=>{
+    const saved=loadSaved();
+    const entry={
+      id:Date.now().toString(),name,timestamp:Date.now(),
+      rec:getFormData(),cats:JSON.parse(JSON.stringify(S.cats)),
+      ev:Object.assign({},S.ev),time:S.time,cvUrl:S.cvUrl
+    };
+    saveSavedToLS([entry,...saved]);
+    showAlert('記録を保存しました。');
+  });
+}
+function openRecModal(){
+  const saved=loadSaved();
+  const list=g('rec-list');list.innerHTML='';
+  if(!saved.length){
+    list.innerHTML='<div style="text-align:center;color:#94a3b8;padding:32px 0;font-size:12px">保存された記録はありません</div>';
+    g('modal-rec').classList.remove('ht');return;
+  }
+  saved.forEach(r=>{
+    const row=document.createElement('div');row.className='rec-row';
+    row.innerHTML=`<div><div class="rec-ts">${new Date(r.timestamp).toLocaleString()}</div><div class="rec-name">${r.name||r.rec.dispatch||'無題の記録'}</div></div>`;
+    const btns=document.createElement('div');btns.className='rec-btns';
+    const lb=document.createElement('button');lb.className='rec-load';lb.textContent='読み込む';
+    lb.onclick=()=>{
+      try{
+        // フォームデータ復元
+        if(r.rec) setFormData(r.rec);
+        // チェックリスト復元
+        const IC=[{id:'cp',title:'接触前',items:[]},{id:'c1',title:'1ピリオド',items:[]},
+          {id:'c2',title:'2ピリオド',items:[]},{id:'c3',title:'3ピリオド',items:[]},
+          {id:'c4',title:'4ピリオド',items:[]},{id:'c5',title:'5ピリオド',items:[]}];
+        S.cats=JSON.parse(JSON.stringify(r.cats||IC));
+        // 評価・タイマー・キャンバス復元
+        S.ev=r.ev?Object.assign({},r.ev):{};
+        S.time=Number(r.time)||0;
+        S.cvUrl=r.cvUrl||null;
+        // UI再描画
+        renderChecklist();
+        updateTimerDisp();
+        setTimeout(()=>initCanvases(),150);
+        // モーダルを閉じてアラート表示
+        closeModal('modal-rec');
+        setTimeout(()=>showAlert('データを読み込みました。'),50);
+      }catch(e){
+        console.error('読み込みエラー:',e);
+        closeModal('modal-rec');
+        setTimeout(()=>showAlert('読み込みに失敗しました。'),50);
+      }
+    };
+    const db=document.createElement('button');
+    db.style.cssText='padding:6px;background:transparent;border:none;cursor:pointer;color:#94a3b8;display:flex';
+    db.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>';
+    db.onclick=()=>showConfirm('この記録を削除しますか？',()=>{
+      saveSavedToLS(loadSaved().filter(s=>s.id!==r.id));
+      openRecModal();
+    });
+    btns.appendChild(lb);btns.appendChild(db);row.appendChild(btns);list.appendChild(row);
+  });
+  g('modal-rec').classList.remove('ht');
+}
+function closeModal(id){g(id).classList.add('ht');}
+
+/* ── PDF ── */
+function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+async function exportPDF(){
+  showAlert('PDFを作成しています...');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }catch{showAlert('ライブラリ読み込みに失敗しました。');return;}
+  const{jsPDF}=window.jspdf;
+  const fd=getFormData();
+  const oC=S.cats.reduce((s,c)=>s+c.items.filter(i=>S.ev[i.id]==='O').length,0);
+  const tot=S.cats.reduce((s,c)=>s+c.items.length,0);
+  const rate=tot===0?0:Math.round((oC/tot)*100);
+  let ck='';S.cats.forEach(cat=>{ck+=`<h3 style="font-size:13px;margin:8px 0 3px;">【${cat.title}】</h3>`;cat.items.forEach(item=>{const st=S.ev[item.id];const m=st==='O'?'<b style="color:#16a34a">○</b>':st==='X'?'<b style="color:#dc2626">×</b>':'<span style="color:#94a3b8">-</span>';ck+=`<div style="display:flex;gap:6px;font-size:12px;margin-bottom:3px;">${m}<span>${item.label}</span></div>`;});});
+  const con=document.createElement('div');con.style.cssText='position:absolute;left:-9999px;top:0;width:1400px;background:#fff;padding:30px;font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,sans-serif;color:#333;';
+  con.innerHTML=`<h1 style="font-size:22px;border-bottom:2px solid #333;padding-bottom:8px;margin:0 0 10px">救急活動訓練シミュレーション記録</h1><div style="text-align:right;font-size:12px;margin-bottom:15px">出力日時: ${new Date().toLocaleString()}</div><div style="display:flex;gap:30px"><div style="flex:1"><h2 style="font-size:14px;background:#f1f5f9;padding:4px 8px;margin:0 0 8px;border-left:4px solid #3b82f6">■ 傷病者情報</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;font-size:13px"><div><b>指令内容:</b> ${fd.dispatch}</div><div><b>年齢/性別:</b> ${fd.age}/${fd.sex}</div><div><b>目撃:</b> ${fd.witness}</div><div><b>原因:</b> ${fd.cause}</div><div><b>既往歴:</b> ${fd.pmh}</div><div><b>かかりつけ:</b> ${fd.hospital}</div></div><h2 style="font-size:14px;background:#f1f5f9;padding:4px 8px;margin:0 0 8px;border-left:4px solid #3b82f6">■ ピリオド経過</h2><table style="width:100%;border-collapse:collapse;margin-bottom:14px"><thead><tr>${['時期','波形','特記事項','換気','ETCO2','予想活動'].map(h=>`<th style="border:1px solid #cbd5e1;padding:5px;font-size:12px;background:#f8fafc">${h}</th>`).join('')}</tr></thead><tbody>${fd.periods.map((p,i)=>`<tr>${[PL[i],p.rhythm,p.notes,p.vent,p.etco2,p.expectedAction].map(v=>`<td style="border:1px solid #cbd5e1;padding:5px;font-size:12px">${v||''}</td>`).join('')}</tr>`).join('')}</tbody></table><h2 style="font-size:14px;background:#f1f5f9;padding:4px 8px;margin:0 0 8px;border-left:4px solid #3b82f6">■ 活動時間・メモ</h2><div style="font-size:13px;margin-bottom:4px"><b>経過時間:</b> ${fmt(S.time)}</div><div style="border:1px solid #cbd5e1;padding:8px;white-space:pre-wrap;font-size:12px;background:#f8fafc;min-height:36px;margin-bottom:14px">${fd.freeMemo||'記録なし'}</div></div><div style="width:480px;flex-shrink:0"><h2 style="font-size:14px;background:#f1f5f9;padding:4px 8px;margin:0 0 8px;border-left:4px solid #3b82f6">■ 評価チェックリスト</h2>${ck}<div style="text-align:center;margin-top:18px;padding:14px;border:2px solid #333;border-radius:8px"><div style="font-size:12px;font-weight:bold">達成率</div><div style="font-size:26px;font-weight:bold">${rate}%</div></div></div></div>`;
+  document.body.appendChild(con);
+  try{
+    await new Promise(r=>setTimeout(r,500));
+    const cv=await window.html2canvas(con,{scale:2,useCORS:true,logging:false});
+    const img=cv.toDataURL('image/png');
+    const pdf=new jsPDF('l','mm','a4');
+    const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+    let fw=pw,fh=(cv.height*pw)/cv.width;
+    if(fh>ph){fh=ph;fw=(cv.width*ph)/cv.height;}
+    pdf.addImage(img,'PNG',(pw-fw)/2,0,fw,fh);
+    pdf.save('訓練記録_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.pdf');
+    closeModal('modal-cf');
+  }catch(e){console.error(e);showAlert('PDF生成に失敗しました。');}
+  finally{document.body.removeChild(con);}
+}
+
+/* ── ダイアログ ── */
+function showAlert(msg){
+  g('cf-msg').textContent=msg;
+  g('cf-cancel').classList.add('ht');
+  g('cf-ok').style.background='#2563eb';
+  cfCb=null;
+  g('modal-cf').classList.remove('ht');
+}
+function showConfirm(msg,cb){
+  g('cf-msg').textContent=msg;
+  g('cf-cancel').classList.remove('ht');
+  g('cf-ok').style.background='#dc2626';
+  cfCb=cb;
+  g('modal-cf').classList.remove('ht');
+}
+function closeCf(){
+  g('modal-cf').classList.add('ht');
+  cfCb=null;
+}
+function confirmOk(){
+  const cb=cfCb;
+  closeCf();           // 先にモーダルを閉じてからコールバック実行
+  if(cb) cb();
+}
+function showPrompt(title,def,cb){
+  g('pr-title').textContent=title;
+  g('pr-inp').value=def;
+  prCb=cb;
+  g('modal-pr').classList.remove('ht');
+  setTimeout(()=>g('pr-inp').focus(),100);
+}
+function promptOk(){
+  const v=g('pr-inp').value.trim()||g('pr-inp').value;  // 空でも通す
+  closeModal('modal-pr');
+  if(prCb) prCb(v);   // closeModal後にコールバック
+}
+
+/* ── リセット ── */
+function resetAll(){showConfirm('すべての記録をリセットしますか？',()=>location.reload());}
+
+/* ── 初期化 ── */
+window.addEventListener('DOMContentLoaded',()=>{
+  buildTable();
+  renderChecklist();
+  initCanvases();
+  attachDraw('cs');
+  attachDraw('cr');
+  // ピンチズーム・ダブルタップ防止
+  let lastTouch=0;
+  document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouch<300)e.preventDefault();lastTouch=now;},{passive:false});
+  document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
+  // 向き変更時にキャンバスを再描画
+  window.addEventListener('resize',()=>{setTimeout(()=>{syncCanvas(S.tab==='scenario'?'cs':'cr');},200);});
+  window.addEventListener('orientationchange',()=>{setTimeout(()=>{syncCanvas('cs');syncCanvas('cr');},300);});
+});
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
